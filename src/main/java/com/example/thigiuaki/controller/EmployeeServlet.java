@@ -25,16 +25,52 @@ public class EmployeeServlet extends HttpServlet {
         }
         switch (action) {
             case "create":
-                createCustomer(request, response);
+                createEmployee(request, response);
                 break;
             case "edit":
-                updateCustomer(request, response);
                 break;
             case "delete":
-                deleteCustomer(request, response);
                 break;
             default:
                 break;
+        }
+    }
+    private void viewEmployee(HttpServletRequest request, HttpServletResponse response) {
+        int id = Integer.parseInt(request.getParameter("id"));
+        Employee employee = this.employeeService.searchEmployeeById(id);
+        RequestDispatcher dispatcher;
+        if (employee == null) {
+            dispatcher = request.getRequestDispatcher("error-404.jsp");
+        } else {
+            request.setAttribute("employee", employee);
+            dispatcher = request.getRequestDispatcher("customer/view.jsp");
+        }
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void createEmployee(HttpServletRequest request, HttpServletResponse response) {
+        String name = request.getParameter("name");
+        int age = Integer.parseInt(request.getParameter("age"));
+        String jobPosition = request.getParameter("jobPosition");
+        String department = request.getParameter("department");
+        double salary = Double.parseDouble(request.getParameter("salary"));
+        int id = (int) (Math.random() * 1000);
+
+        Employee employee = new Employee(id, name, age, jobPosition, department, salary);
+        this.employeeService.addEmployee(employee);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("customer/create.jsp");
+        request.setAttribute("message", "New employee information was created");
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
     @Override
@@ -45,24 +81,20 @@ public class EmployeeServlet extends HttpServlet {
         }
         switch (action) {
             case "create":
-                showCreateForm(request, response);
                 break;
             case "edit":
-                showEditForm(request, response);
                 break;
             case "delete":
-                showDeleteForm(request, response);
                 break;
             case "view":
-                viewCustomer(request, response);
                 break;
             default:
-                listCustomers(request, response);
+                createEmployee(request, response);
                 break;
         }
     }
 
-    private void listCustomers(HttpServletRequest request, HttpServletResponse response) {
+    private void listEmployee(HttpServletRequest request, HttpServletResponse response) {
         List<Employee> employees = this.employeeService.employeeList();
         request.setAttribute("employees", employees);
 
